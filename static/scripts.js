@@ -23,10 +23,7 @@ async function addTask() {
             body: JSON.stringify({ title, description, due_date: dueDate, priority })
         });
         if (response.ok) {
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDescription').value = '';
-            document.getElementById('taskDueDate').value = '';
-            document.getElementById('taskPriority').value = '';
+            document.getElementById('taskForm').reset();
             loadTasks();
             showFeedback('Tarefa adicionada com sucesso!', 'success');
         } else {
@@ -78,49 +75,90 @@ async function saveTask() {
 async function loadTasks() {
     const response = await fetch('/tasks');
     const tasks = await response.json();
-    const taskList = document.getElementById('taskList');
-    taskList.innerHTML = '';
+    const taskListAll = document.getElementById('taskListAll');
+    const taskListHigh = document.getElementById('taskListHigh');
+    const taskListMedium = document.getElementById('taskListMedium');
+    const taskListLow = document.getElementById('taskListLow');
+    taskListAll.innerHTML = '';
+    taskListHigh.innerHTML = '';
+    taskListMedium.innerHTML = '';
+    taskListLow.innerHTML = '';
+
     tasks.forEach(task => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-3 task-card-container'; // Classe adicional para a animação
+        const card = document.createElement('div');
+        card.className = 'card';
 
         // Adicionando classe baseada na prioridade
         if (task.priority === 'Alta') {
-            li.classList.add('priority-high');
+            card.classList.add('priority-high');
         } else if (task.priority === 'Média') {
-            li.classList.add('priority-medium');
+            card.classList.add('priority-medium');
         } else if (task.priority === 'Baixa') {
-            li.classList.add('priority-low');
+            card.classList.add('priority-low');
         }
 
-        li.innerHTML = `
-            <div>
-                <h5>${task.title}</h5>
-                <p>${task.description}</p>
-                <small>Vencimento: ${task.due_date || 'Sem data'}</small><br>
-                <small>Prioridade: ${task.priority}</small><br>
-                <small>Status: ${task.status}</small>
-            </div>
-            <div>
+        card.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">${task.title}</h5>
+                <p class="card-text">${task.description}</p>
+                <p class="card-text"><small>Vencimento: ${task.due_date || 'Sem data'}</small></p>
+                <p class="card-text"><small>Prioridade: ${task.priority}</small></p>
+                <p class="card-text"><small>Status: ${task.status}</small></p>
                 <button class="btn btn-primary btn-sm me-2" onclick="editTask(${task.id}, '${task.title}', '${task.description}', '${task.due_date}', '${task.priority}', '${task.status}')">
-                    <i class="bi bi-pencil-square"></i>
+                    <i class="bi bi-pencil-square"></i> Editar
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">
-                    <i class="bi bi-trash"></i>
+                    <i class="bi bi-trash"></i> Excluir
                 </button>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" value="" id="taskStatus${task.id}" ${task.status === 'Completed' ? 'checked' : ''} onclick="toggleTaskStatus(${task.id})">
+                    <label class="form-check-label" for="taskStatus${task.id}">
+                        Concluída
+                    </label>
+                </div>
             </div>
         `;
-        taskList.appendChild(li);
+        col.appendChild(card);
+        taskListAll.appendChild(col);
+
+        // Adicionando cards nas abas específicas de prioridade
+        if (task.priority === 'Alta') {
+            taskListHigh.appendChild(col.cloneNode(true));
+        } else if (task.priority === 'Média') {
+            taskListMedium.appendChild(col.cloneNode(true));
+        } else if (task.priority === 'Baixa') {
+            taskListLow.appendChild(col.cloneNode(true));
+        }
     });
 }
 
 async function deleteTask(id) {
     const response = await fetch(`/delete/${id}`, { method: 'DELETE' });
     if (response.ok) {
-        loadTasks();
+        const taskCard = document.querySelector(`.task-card-container[data-id="${id}"]`);
+        if (taskCard) {
+            taskCard.classList.add('fadeOutDown'); // Adiciona a animação de saída
+            setTimeout(() => {
+                loadTasks();
+            }, 500); // Tempo suficiente para a animação
+        } else {
+            loadTasks();
+        }
         showFeedback('Tarefa excluída com sucesso!', 'success');
     } else {
         showFeedback('Erro ao excluir tarefa.', 'danger');
+    }
+}
+
+async function toggleTaskStatus(id) {
+    const response = await fetch(`/toggle-status/${id}`, { method: 'PUT' });
+    if (response.ok) {
+        loadTasks();
+        showFeedback('Status da tarefa atualizado!', 'success');
+    } else {
+        showFeedback('Erro ao atualizar status da tarefa.', 'danger');
     }
 }
 
