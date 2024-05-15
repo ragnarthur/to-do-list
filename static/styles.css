@@ -1,0 +1,126 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-image: url('https://cdn.pixabay.com/photo/2017/08/12/09/17/industry-2633878_960_720.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Mantém a imagem fixa enquanto o conteúdo rola */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.85); /* Leve transparência */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+    animation: fadeIn 0.5s ease-in-out;
+    margin: 20px; /* Adicionado para garantir margem em dispositivos móveis */
+}
+
+h1 {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.list-group-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    animation: fadeInUp 0.5s ease-in-out;
+}
+
+.list-group-item div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.priority-high {
+    border-left: 5px solid red;
+    background-color: #f8d7da;
+}
+
+.priority-medium {
+    border-left: 5px solid orange;
+    background-color: #fff3cd;
+}
+
+.priority-low {
+    border-left: 5px solid green;
+    background-color: #d4edda;
+}
+
+.alert {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.alert.d-none {
+    display: none;
+}
+
+button {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 10px; /* Garante margem em dispositivos móveis */
+    }
+
+    .list-group-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .list-group-item div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .list-group-item div h5, 
+    .list-group-item div p,
+    .list-group-item div small {
+        margin-bottom: 5px;
+    }
+}
