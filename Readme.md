@@ -65,4 +65,4 @@ A Aplicação de Lista de Tarefas é uma ferramenta 🛠️ moderna e responsiva
 
 ## ⚖️ Licença
 
-(Especifique a licença sob a qual o projeto está disponibilizado aqui.)
+
