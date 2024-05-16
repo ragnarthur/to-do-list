@@ -91,7 +91,7 @@ async function loadTasks() {
     };
 
     tasks.forEach(task => {
-        if (task.status === 'Completed') {
+        if (task.status === 'Concluída') {
             createTaskElement(task, taskListCompleted);
         } else {
             groupedTasks[task.priority].push(task);
@@ -111,9 +111,15 @@ async function loadTasks() {
     });
 }
 
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', options).replace(/\//g, '-');
+}
+
 function createTaskElement(task, container) {
     const col = document.createElement('div');
-    col.className = 'task-card-container';
+    col.className = 'task-card-container mb-3';
     const card = document.createElement('div');
     card.className = 'card';
 
@@ -125,24 +131,29 @@ function createTaskElement(task, container) {
         card.classList.add('priority-low');
     }
 
+    if (task.status === 'Concluída') {
+        card.classList.add('completed-task');
+    }
+
     card.innerHTML = `
         <div class="card-body">
             <h5 class="card-title">${task.title}</h5>
             <p class="card-text">${task.description}</p>
-            <p class="card-text"><small>Vencimento: ${task.due_date || 'Sem data'}</small></p>
+            <p class="card-text"><small>Vencimento: ${task.due_date ? formatDate(task.due_date) : 'Sem data'}</small></p>
             <p class="card-text"><small>Prioridade: ${task.priority}</small></p>
             <p class="card-text"><small>Status: ${task.status}</small></p>
-            <button class="btn btn-primary btn-sm me-2" onclick="editTask(${task.id}, '${task.title}', '${task.description}', '${task.due_date}', '${task.priority}', '${task.status}')">
-                <i class="bi bi-pencil-square"></i> Editar
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">
-                <i class="bi bi-trash"></i> Excluir
-            </button>
-            <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" value="" id="taskStatus${task.id}" ${task.status === 'Completed' ? 'checked' : ''} onclick="toggleTaskStatus(${task.id})">
-                <label class="form-check-label" for="taskStatus${task.id}">
-                    Concluída
-                </label>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <button class="btn btn-primary btn-sm me-2" onclick="editTask(${task.id}, '${task.title}', '${task.description}', '${task.due_date}', '${task.priority}', '${task.status}')">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </div>
+                <button class="btn btn-${task.status === 'Concluída' ? 'secondary' : 'success'} btn-sm" onclick="toggleTaskStatus(${task.id})">
+                    ${task.status === 'Concluída' ? '<i class="bi bi-arrow-counterclockwise"></i> Reabrir tarefa' : '<i class="bi bi-check-circle"></i> Concluir tarefa'}
+                </button>
             </div>
         </div>
     `;
