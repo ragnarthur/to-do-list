@@ -75,63 +75,79 @@ async function saveTask() {
 async function loadTasks() {
     const response = await fetch('/tasks');
     const tasks = await response.json();
-    const taskListAll = document.getElementById('taskListAll');
     const taskListHigh = document.getElementById('taskListHigh');
     const taskListMedium = document.getElementById('taskListMedium');
     const taskListLow = document.getElementById('taskListLow');
-    taskListAll.innerHTML = '';
+    const taskListCompleted = document.getElementById('taskListCompleted');
     taskListHigh.innerHTML = '';
     taskListMedium.innerHTML = '';
     taskListLow.innerHTML = '';
+    taskListCompleted.innerHTML = '';
+
+    const groupedTasks = {
+        Alta: [],
+        Média: [],
+        Baixa: []
+    };
 
     tasks.forEach(task => {
-        const col = document.createElement('div');
-        col.className = 'col-md-4 mb-3 task-card-container'; // Classe adicional para a animação
-        const card = document.createElement('div');
-        card.className = 'card';
-
-        // Adicionando classe baseada na prioridade
-        if (task.priority === 'Alta') {
-            card.classList.add('priority-high');
-        } else if (task.priority === 'Média') {
-            card.classList.add('priority-medium');
-        } else if (task.priority === 'Baixa') {
-            card.classList.add('priority-low');
-        }
-
-        card.innerHTML = `
-            <div class="card-body">
-                <h5 class="card-title">${task.title}</h5>
-                <p class="card-text">${task.description}</p>
-                <p class="card-text"><small>Vencimento: ${task.due_date || 'Sem data'}</small></p>
-                <p class="card-text"><small>Prioridade: ${task.priority}</small></p>
-                <p class="card-text"><small>Status: ${task.status}</small></p>
-                <button class="btn btn-primary btn-sm me-2" onclick="editTask(${task.id}, '${task.title}', '${task.description}', '${task.due_date}', '${task.priority}', '${task.status}')">
-                    <i class="bi bi-pencil-square"></i> Editar
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">
-                    <i class="bi bi-trash"></i> Excluir
-                </button>
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="checkbox" value="" id="taskStatus${task.id}" ${task.status === 'Completed' ? 'checked' : ''} onclick="toggleTaskStatus(${task.id})">
-                    <label class="form-check-label" for="taskStatus${task.id}">
-                        Concluída
-                    </label>
-                </div>
-            </div>
-        `;
-        col.appendChild(card);
-        taskListAll.appendChild(col);
-
-        // Adicionando cards nas abas específicas de prioridade
-        if (task.priority === 'Alta') {
-            taskListHigh.appendChild(col.cloneNode(true));
-        } else if (task.priority === 'Média') {
-            taskListMedium.appendChild(col.cloneNode(true));
-        } else if (task.priority === 'Baixa') {
-            taskListLow.appendChild(col.cloneNode(true));
+        if (task.status === 'Completed') {
+            createTaskElement(task, taskListCompleted);
+        } else {
+            groupedTasks[task.priority].push(task);
         }
     });
+
+    Object.keys(groupedTasks).forEach(priority => {
+        groupedTasks[priority].forEach(task => {
+            if (priority === 'Alta') {
+                createTaskElement(task, taskListHigh);
+            } else if (priority === 'Média') {
+                createTaskElement(task, taskListMedium);
+            } else if (priority === 'Baixa') {
+                createTaskElement(task, taskListLow);
+            }
+        });
+    });
+}
+
+function createTaskElement(task, container) {
+    const col = document.createElement('div');
+    col.className = 'task-card-container';
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    if (task.priority === 'Alta') {
+        card.classList.add('priority-high');
+    } else if (task.priority === 'Média') {
+        card.classList.add('priority-medium');
+    } else if (task.priority === 'Baixa') {
+        card.classList.add('priority-low');
+    }
+
+    card.innerHTML = `
+        <div class="card-body">
+            <h5 class="card-title">${task.title}</h5>
+            <p class="card-text">${task.description}</p>
+            <p class="card-text"><small>Vencimento: ${task.due_date || 'Sem data'}</small></p>
+            <p class="card-text"><small>Prioridade: ${task.priority}</small></p>
+            <p class="card-text"><small>Status: ${task.status}</small></p>
+            <button class="btn btn-primary btn-sm me-2" onclick="editTask(${task.id}, '${task.title}', '${task.description}', '${task.due_date}', '${task.priority}', '${task.status}')">
+                <i class="bi bi-pencil-square"></i> Editar
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">
+                <i class="bi bi-trash"></i> Excluir
+            </button>
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" value="" id="taskStatus${task.id}" ${task.status === 'Completed' ? 'checked' : ''} onclick="toggleTaskStatus(${task.id})">
+                <label class="form-check-label" for="taskStatus${task.id}">
+                    Concluída
+                </label>
+            </div>
+        </div>
+    `;
+    col.appendChild(card);
+    container.appendChild(col);
 }
 
 async function deleteTask(id) {
@@ -139,10 +155,10 @@ async function deleteTask(id) {
     if (response.ok) {
         const taskCard = document.querySelector(`.task-card-container[data-id="${id}"]`);
         if (taskCard) {
-            taskCard.classList.add('fadeOutDown'); // Adiciona a animação de saída
+            taskCard.classList.add('fadeOutDown');
             setTimeout(() => {
                 loadTasks();
-            }, 500); // Tempo suficiente para a animação
+            }, 500);
         } else {
             loadTasks();
         }
